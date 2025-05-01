@@ -9,6 +9,7 @@ window.addEventListener('hashchange', () => {
 });
 
 function loadPage() {
+  playFeedback(); 
   const view = (location.hash.split('?')[0] || '#start').slice(1);
 
   fetch(`views/${view}.html`)
@@ -26,6 +27,14 @@ function loadPage() {
 function showLogin() {
   document.getElementById('loginPanel')?.classList.add('show');
   navigator.vibrate?.([50]);
+}
+
+const popSound = new Audio('/sounds/pop.wav');
+
+function playFeedback() {
+  navigator.vibrate?.([30]);      // krótka wibracja
+  popSound.currentTime = 0;       // zresetuj dźwięk
+  popSound.play().catch(() => {}); // nie rzucaj błędów jeśli zablokowane
 }
 
 // Udostępnij globalnie
