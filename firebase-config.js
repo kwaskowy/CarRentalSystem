@@ -61,11 +61,7 @@ window.signInEmail = async (event) => {
   }
 };
 
-// Automatyczne ładowanie strony po zalogowaniu/wylogowaniu
-onAuthStateChanged(auth, () => {
-  if (typeof window.loadPage === 'function') window.loadPage();
-});
-
+// Wylogowanie
 window.logout = async () => {
   await auth.signOut();
   location.hash = '#start';
@@ -73,28 +69,23 @@ window.logout = async () => {
 
 onAuthStateChanged(auth, (user) => {
   const nav = document.getElementById('mainNav');
-  if (user) {
-    nav.classList.remove('d-none');
-    window.loadPage?.();
-  } else {
-    nav.classList.add('d-none');
-    location.hash = '#start';
-  }
-});
-
-onAuthStateChanged(auth, (user) => {
-  const nav = document.getElementById('mainNav');
+  const loginPanel = document.getElementById('loginPanel');
   const hash = location.hash.split('?')[0];
 
   if (user) {
-    nav.classList.remove('d-none');
+    nav?.classList.remove('d-none');
+    loginPanel?.classList.remove('show');
+
     if (hash === '#start' || hash === '' || hash === '#') {
       location.hash = '#rentals';
+      window.loadPage?.(); // wymuszone ładowanie widoku
     } else {
-      window.loadPage?.();
+      window.loadPage?.(); // np. vehicles, payments itp.
     }
   } else {
-    nav.classList.add('d-none');
-    location.hash = '#start';
+    nav?.classList.add('d-none');
+    loginPanel?.classList.remove('show');
+    if (hash !== '#start') location.hash = '#start';
+    window.loadPage?.(); // załaduj ekran startowy
   }
 });
