@@ -13,12 +13,17 @@ export async function loadVehicles() {
     div.className = 'col-6 mb-3';
     div.innerHTML = `
       <div class="card h-100 p-2 text-center" style="cursor:pointer;" onclick="location.hash='vehicle-details?id=${id}'">
-        <img src="${car.imageUrl}" alt="car" class="img-fluid rounded" style="height:120px; object-fit:cover;">
-        <div class="card-body">
-          <strong>${car.brand} ${car.model}</strong><br>
-          <small>${car.year}</small>
-        </div>
-      </div>
+  <img
+    src="${car.imagePath}"
+    alt="car"
+    class="img-fluid rounded"
+    style="width: 100%; aspect-ratio: 1 / 1; object-fit: cover;"
+  >
+  <div class="card-body">
+    <strong>${car.brand} ${car.model}</strong><br>
+    <small>${car.year}</small>
+  </div>
+</div>
     `;
     container.appendChild(div);
   });
@@ -39,7 +44,7 @@ export async function loadVehicleDetails() {
   if (vehicle) {
     document.getElementById('vehicle-detail').innerHTML = `
       <h5>${vehicle.brand} ${vehicle.model} (${vehicle.year})</h5>
-      <img src="${car.imageBase64}" alt="car" class="img-fluid rounded" style="height:120px; object-fit:cover;">
+      <img src="${vehicle.imagePath}" alt="car" class="card mb-2 p-3" style="width: 60%; aspect-ratio: 1 / 1; object-fit: cover;"; object-fit:cover;">
       <ul class="list-group">
         <li class="list-group-item"><strong>Engine:</strong> ${vehicle.engine}</li>
         <li class="list-group-item"><strong>Transmission:</strong> ${vehicle.transmission}</li>
