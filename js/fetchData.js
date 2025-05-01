@@ -10,7 +10,7 @@ export async function loadVehicles() {
     const id = docItem.id;
 
     const div = document.createElement('div');
-    div.className = 'col-6 mb-3';
+    div.className = 'col-12 col-sm-6 col-lg-4 mb-4';
     div.innerHTML = `
       <div class="card h-100 p-2 text-center" style="cursor:pointer;" onclick="location.hash='vehicle-details?id=${id}'">
   <img
@@ -44,7 +44,9 @@ export async function loadVehicleDetails() {
   if (vehicle) {
     document.getElementById('vehicle-detail').innerHTML = `
       <h5>${vehicle.brand} ${vehicle.model} (${vehicle.year})</h5>
-      <img src="${vehicle.imagePath}" alt="car" class="card mb-2 p-3" style="width: 60%; aspect-ratio: 1 / 1; object-fit: cover;"; object-fit:cover;">
+      <div class="text-center">
+        <img src="${vehicle.imagePath}" alt="car" class="img-fluid rounded shadow-sm" style="max-width: 100%; aspect-ratio: 1 / 1; object-fit: cover;">
+      </div>
       <ul class="list-group">
         <li class="list-group-item"><strong>Engine:</strong> ${vehicle.engine}</li>
         <li class="list-group-item"><strong>Transmission:</strong> ${vehicle.transmission}</li>
