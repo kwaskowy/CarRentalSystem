@@ -65,3 +65,19 @@ window.signInEmail = async (event) => {
 onAuthStateChanged(auth, () => {
   if (typeof window.loadPage === 'function') window.loadPage();
 });
+
+window.logout = async () => {
+  await auth.signOut();
+  location.hash = '#start';
+};
+
+onAuthStateChanged(auth, (user) => {
+  const nav = document.getElementById('mainNav');
+  if (user) {
+    nav.classList.remove('d-none');
+    window.loadPage?.();
+  } else {
+    nav.classList.add('d-none');
+    location.hash = '#start';
+  }
+});
