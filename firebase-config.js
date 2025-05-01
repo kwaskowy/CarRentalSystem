@@ -81,3 +81,20 @@ onAuthStateChanged(auth, (user) => {
     location.hash = '#start';
   }
 });
+
+onAuthStateChanged(auth, (user) => {
+  const nav = document.getElementById('mainNav');
+  const hash = location.hash.split('?')[0];
+
+  if (user) {
+    nav.classList.remove('d-none');
+    if (hash === '#start' || hash === '' || hash === '#') {
+      location.hash = '#rentals';
+    } else {
+      window.loadPage?.();
+    }
+  } else {
+    nav.classList.add('d-none');
+    location.hash = '#start';
+  }
+});
