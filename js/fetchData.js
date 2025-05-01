@@ -10,7 +10,7 @@ export async function loadVehicles() {
     const id = docItem.id;
 
     const div = document.createElement('div');
-    div.className = 'col-12 col-sm-6 col-lg-4 mb-4';
+    div.className = 'col-6 col-sm-6 col-lg-4 mb-4';
     div.innerHTML = `
       <div class="card h-100 p-2 text-center" style="cursor:pointer;" onclick="location.hash='vehicle-details?id=${id}'">
   <img
