@@ -1,6 +1,6 @@
-<div class="d-flex flex-column justify-content-between vh-100 text-center px-4 py-5 position-relative overflow-hidden">
+<div class="d-flex flex-column justify-content-between vh-100 text-center px-4 py-3 position-relative overflow-hidden">
     <div>
-      <img src="images/login-graphic.png" alt="Illustration" class="img-fluid mb-4" style="max-height: 250px;">
+      <img src="images/login-graphic.png" alt="Illustration" class="img-fluid w-100 mb-4" style="max-height: 50vh; object-fit: contain;">
       <h4 class="mb-2">Welcome</h4>
       <p class="text-muted">Your best car rental system.<br>Ever.</p>
       <button class="btn btn-dark w-100 mt-4" onclick="showLogin()">Sign in</button>
@@ -10,8 +10,8 @@
       © 2025 Krystian Paryła - Bartłomiej Rąpała
     </div>
   
-    <div id="loginPanel" class="position-absolute top-100 start-0 w-100 h-100 bg-white px-4 pt-5 transition">
-      <div class="container" style="max-width: 400px;">
+    <div id="loginPanel" class="position-absolute start-0 w-100 bg-white px-4 pt-3 transition" style="top: 100%; height: 95vh; overflow-y: auto;">
+      <div class="container" style="max-width: 360px;">
         <h5 class="text-center mb-4">Sign in to your account</h5>
         <form onsubmit="signInEmail(event)">
           <input id="email" type="email" placeholder="Email" class="form-control mb-3" required />
@@ -22,5 +22,4 @@
       </div>
     </div>
   </div>
-
   
