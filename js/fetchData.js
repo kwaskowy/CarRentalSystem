@@ -81,18 +81,49 @@ export async function loadRentals() {
 
   const snapshot = await getDocs(q);
 
+  // opcje doLocale…
+  const dateOptions = { year: 'numeric', month: 'long', day: 'numeric' };
+  const timeOptions = { hour: '2-digit', minute: '2-digit' };
+
+  // mapa statusów → klas Bootstrap
+  const statusMap = {
+    cancelled:  'bg-danger',   // czerwony      – anulowany
+    pending:    'bg-warning',  // żółty         – w oczekiwaniu
+    confirmed:  'bg-primary',  // niebieski     – potwierdzony
+    completed:  'bg-success'   // zielony       – zakończony
+  };
+
   snapshot.forEach(doc => {
     const data = doc.data();
+
+    // Timestamp → Date
+    const startDate = data.startDate.toDate();
+    const endDate   = data.endDate.toDate();
+
+    // formatowanie daty i czasu
+    const startStr = startDate.toLocaleDateString('pl-PL', dateOptions)
+                   + ' ' + startDate.toLocaleTimeString('pl-PL', timeOptions);
+    const endStr   = endDate.toLocaleDateString('pl-PL', dateOptions)
+                   + ' ' + endDate.toLocaleTimeString('pl-PL', timeOptions);
+
+    // dobieramy klasę badge; jeśli status nieznany → szary
+    const statusClass = statusMap[data.status] || 'bg-secondary';
+
     const div = document.createElement('div');
     div.className = 'card mb-3';
     div.innerHTML = `
       <div class="card-body">
         <strong>${data.carId}</strong><br>
-        <small>${data.startDate} → ${data.endDate}</small><br>
-        <span class="badge bg-info">${data.status}</span>
-        <div class="mt-2 text-muted small">Price: ${data.price} PLN</div>
+        <small>${startStr} → ${endStr}</small><br>
+        <span class="badge ${statusClass} text-uppercase">
+          ${data.status}
+        </span>
+        <div class="mt-2 text-muted small">
+          Price: ${data.price} PLN
+        </div>
       </div>
     `;
     container.appendChild(div);
   });
 }
+
