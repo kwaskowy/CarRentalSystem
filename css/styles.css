@@ -1,4 +1,4 @@
-body { font-family: 'Segoe UI', sans-serif; background: #f8f9fa; }
+body { font-family: 'Segoe UI', sans-serif; background: #f8f9fa;}
 .card { border-radius: 0.8rem; }
 .transition {
     transition: top 0.5s ease;
@@ -11,3 +11,14 @@ body { font-family: 'Segoe UI', sans-serif; background: #f8f9fa; }
   #loginPanel {
     background-color: #f8f9fa; /* dokładnie ten sam kolor co body */
   }
+
+  .footer {
+    position: fixed;
+    bottom: 0;
+    left: 0;
+    width: 100%;
+    background: #f8f9fa;
+    padding: 10px 0;
+    z-index: 999;
+  }
+  
