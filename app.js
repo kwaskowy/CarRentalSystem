@@ -20,6 +20,7 @@ function loadPage() {
       const module = await import('./js/fetchData.js');
       if (view === 'vehicles') module.loadVehicles();
       if (view === 'vehicle-details') module.loadVehicleDetails();
+      if (view === 'rentals') module.loadRentals();
     });
 }
 function showLogin() {

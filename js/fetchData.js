@@ -1,4 +1,12 @@
-import { collection, getDocs, doc, getDoc } from "https://www.gstatic.com/firebasejs/9.6.10/firebase-firestore.js";
+import {
+  collection,
+  getDocs,
+  getDoc,
+  doc,
+  query,
+  where
+} from "https://www.gstatic.com/firebasejs/9.6.10/firebase-firestore.js";
+
 
 export async function loadVehicles() {
   const querySnapshot = await getDocs(collection(window.db, "Vehicles"));
@@ -58,4 +66,33 @@ export async function loadVehicleDetails() {
   } else {
     document.getElementById('vehicle-detail').innerHTML = '<p>Vehicle not found.</p>';
   }
+}
+export async function loadRentals() {
+  const user = window.auth.currentUser;
+  if (!user) return;
+
+  const container = document.getElementById('rentals-list');
+  container.innerHTML = '';
+
+  const q = query(
+    collection(window.db, "Rentals"),
+    where("userId", "==", user.uid)
+  );
+
+  const snapshot = await getDocs(q);
+
+  snapshot.forEach(doc => {
+    const data = doc.data();
+    const div = document.createElement('div');
+    div.className = 'card mb-3';
+    div.innerHTML = `
+      <div class="card-body">
+        <strong>${data.carId}</strong><br>
+        <small>${data.startDate} → ${data.endDate}</small><br>
+        <span class="badge bg-info">${data.status}</span>
+        <div class="mt-2 text-muted small">Price: ${data.price} PLN</div>
+      </div>
+    `;
+    container.appendChild(div);
+  });
 }
