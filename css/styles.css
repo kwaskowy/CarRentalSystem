@@ -9,5 +9,5 @@ body { font-family: 'Segoe UI', sans-serif; background: #f8f9fa; }
     top: 0 !important;
   }
   #loginPanel {
-    background-color: #ffffff; /* dokładnie ten sam kolor co body */
+    background-color: #f8f9fa; /* dokładnie ten sam kolor co body */
   }
