@@ -53,20 +53,24 @@ export async function loadVehicleDetails() {
     document.getElementById('vehicle-detail').innerHTML = `
       <h5>${vehicle.brand} ${vehicle.model} (${vehicle.year})</h5>
       <div class="text-center">
-        <img src="${vehicle.imagePath}" alt="car" class="img-fluid rounded shadow-sm" style="max-width: 100%; aspect-ratio: 1 / 1; object-fit: cover;">
+        <img src="${vehicle.imagePath}" alt="car" class="img-fluid rounded shadow-sm" style="max-width: 90%; aspect-ratio: 1 / 1; object-fit: cover;">
       </div>
-      <ul class="list-group">
+      <ul class="list-group my-3">
         <li class="list-group-item"><strong>Engine:</strong> ${vehicle.engine}</li>
         <li class="list-group-item"><strong>Transmission:</strong> ${vehicle.transmission}</li>
         <li class="list-group-item"><strong>Seats:</strong> ${vehicle.seats}</li>
         <li class="list-group-item"><strong>Price:</strong> ${vehicle.price} £/day</li>
       </ul>
-      <button class="btn btn-secondary mt-3" onclick="history.back()">Back</button>
+      <div class="d-flex justify-content-center gap-3 mt-3">
+        <button class="btn btn-secondary px-4" onclick="location.hash='rentals'">Back</button>
+        <button class="btn btn-dark px-4" onclick="location.hash='order?id=${id}'">Rent</button>
+      </div>
     `;
   } else {
     document.getElementById('vehicle-detail').innerHTML = '<p>Vehicle not found.</p>';
   }
 }
+
 export async function loadRentals() {
   const user = window.auth.currentUser;
   if (!user) return;
@@ -153,5 +157,25 @@ export async function loadContact() {
       </div>
     `;
     container.appendChild(div);
+  });
+}
+export async function loadOrder() {
+  const select = document.getElementById('vehicleSelect');
+  select.innerHTML = '';
+
+  const params = new URLSearchParams(location.hash.split('?')[1]);
+  const preselectedId = params.get('id');
+
+  const snapshot = await getDocs(collection(window.db, "Vehicles"));
+
+  snapshot.forEach(doc => {
+    const car = doc.data();
+    const option = document.createElement('option');
+    option.value = doc.id;
+    option.textContent = `${car.brand} ${car.model} (${car.year})`;
+    if (doc.id === preselectedId) {
+      option.selected = true;
+    }
+    select.appendChild(option);
   });
 }
