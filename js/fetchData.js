@@ -33,7 +33,7 @@ export async function loadVehicles() {
     src="${car.imagePath}"
     alt="car"
     class="img-fluid rounded"
-    style="width: 100%; aspect-ratio: 1 / 1; object-fit: cover;"
+    style="width: 100%; aspect-ratio: 1 / 1; object-fit: cover; user-select:none;"
   >
   <div class="card-body">
     <strong>${car.brand} ${car.model}</strong><br>
@@ -58,6 +58,12 @@ export async function loadVehicleDetails() {
   const vehicle = vehicleDoc.data();
 
   if (vehicle) {
+    const currentUser = window.auth.currentUser;
+    const isRestrictedUser = currentUser && (
+      currentUser.uid === 'P6PdwRRWIUXFeXySixV7CIrzCV53' ||
+      currentUser.uid === 'Qg6GAd6R87gvu9c08CoI23FHNv82'
+    );
+
     document.getElementById('vehicle-detail').innerHTML = `
       <h5>${vehicle.brand} ${vehicle.model} (${vehicle.year})</h5>
       <div class="text-center">
@@ -70,14 +76,19 @@ export async function loadVehicleDetails() {
         <li class="list-group-item"><strong>Price:</strong> ${vehicle.price} PLN/day</li>
       </ul>
       <div class="d-flex justify-content-center gap-3 mt-3">
-        <button class="btn btn-secondary px-4" onclick="location.hash='rentals'">Back</button>
-        <button class="btn btn-dark px-4" onclick="location.hash='order?id=${id}'">Rent</button>
+        <button class="btn btn-secondary px-4" onclick="location.hash='vehicles'">Back</button>
+        ${
+          isRestrictedUser
+            ? ''
+            : `<button class="btn btn-dark px-4" onclick="location.hash='order?id=${id}'">Rent</button>`
+        }
       </div>
     `;
   } else {
     document.getElementById('vehicle-detail').innerHTML = '<p>Vehicle not found.</p>';
   }
 }
+
 
 export async function loadRentals() {
   const user = window.auth.currentUser;

@@ -140,3 +140,7 @@ onAuthStateChanged(auth, (user) => {
     authInitialized = false;
   }
 });
+window.hideLogin = () => {
+  document.getElementById('loginPanel')?.classList.remove('show');
+  location.hash = '#start';
+};
