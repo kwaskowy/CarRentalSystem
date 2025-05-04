@@ -5,6 +5,10 @@ import {
   onAuthStateChanged
 } from "https://www.gstatic.com/firebasejs/9.6.10/firebase-auth.js";
 import { getFirestore } from "https://www.gstatic.com/firebasejs/9.6.10/firebase-firestore.js";
+import {
+  setDoc,
+  doc
+} from "https://www.gstatic.com/firebasejs/9.6.10/firebase-firestore.js";
 
 const firebaseConfig = {
   apiKey: "AIzaSyDtqylOxpWDmyDZoEt0a7yWC9eA6r_H8mM",
@@ -27,6 +31,15 @@ window.db = db;
 window.signInGoogle = async () => {
   try {
     const result = await signInWithPopup(auth, provider);
+    const user = result.user;
+
+    // Zapisz użytkownika do kolekcji "Users"
+    await setDoc(doc(db, "Users", user.uid), {
+      email: user.email,
+      displayName: user.displayName || null,
+      provider: "google"
+    }, { merge: true });
+
     navigator.vibrate?.([100, 50, 100]);
     location.hash = 'rentals';
   } catch (error) {
@@ -41,7 +54,14 @@ window.signInEmail = async (event) => {
   const password = document.getElementById('password').value;
 
   try {
-    await signInWithEmailAndPassword(auth, email, password);
+    const result = await signInWithEmailAndPassword(auth, email, password);
+    const user = result.user;
+
+    // Zapisz użytkownika do kolekcji "Users"
+    await setDoc(doc(db, "Users", user.uid), {
+      email: user.email,
+      provider: "email"
+    }, { merge: true });
     navigator.vibrate?.([100]);
     location.hash = 'rentals';
   } catch (error) {

@@ -10,6 +10,11 @@ import {
   updateDoc
 } from "https://www.gstatic.com/firebasejs/9.6.10/firebase-firestore.js";
 
+import {
+  getAuth
+} from "https://www.gstatic.com/firebasejs/9.6.10/firebase-auth.js";
+
+const authInstance = getAuth();
 
 export async function loadVehicles() {
   const querySnapshot = await getDocs(collection(window.db, "Vehicles"));
@@ -83,23 +88,17 @@ export async function loadRentals() {
 
   let q;
 
-  // Szef widzi wszystko
   if (user.uid === "Qg6GAd6R87gvu9c08CoI23FHNv82") {
     q = collection(window.db, "Rentals");
-  }
-  // Admin widzi tylko do zatwierdzenia
-  else if (user.uid === "P6PdwRRWIUXFeXySixV7CIrzCV53") {
+  } else if (user.uid === "P6PdwRRWIUXFeXySixV7CIrzCV53") {
     q = query(collection(window.db, "Rentals"), where("status", "==", "to be accepted"));
-  }
-  // Normalny użytkownik widzi tylko swoje
-  else {
+  } else {
     q = query(collection(window.db, "Rentals"), where("userId", "==", user.uid));
   }
 
   const snapshot = await getDocs(q);
 
   const dateOptions = { year: 'numeric', month: 'long', day: 'numeric' };
-
   const statusMap = {
     cancelled:  'bg-danger',
     pending:    'bg-warning',
@@ -108,17 +107,19 @@ export async function loadRentals() {
     'to be accepted': 'bg-warning text-dark'
   };
 
-  snapshot.forEach(docItem => {
+  for (const docItem of snapshot.docs) {
     const data = docItem.data();
     const id = docItem.id;
 
     const startDate = data.startDate.toDate();
     const endDate = data.endDate.toDate();
-
-    const startStr = startDate.toLocaleDateString('pl-PL', dateOptions)
-    const endStr   = endDate.toLocaleDateString('pl-PL', dateOptions)
-
+    const startStr = startDate.toLocaleDateString('pl-PL', dateOptions);
+    const endStr = endDate.toLocaleDateString('pl-PL', dateOptions);
     const statusClass = statusMap[data.status] || 'bg-secondary';
+
+    const email = user.uid === "Qg6GAd6R87gvu9c08CoI23FHNv82"
+      ? await getUserEmailById(data.userId)
+      : null;
 
     const div = document.createElement('div');
     div.className = 'card mb-3';
@@ -128,7 +129,7 @@ export async function loadRentals() {
         <small>${startStr} → ${endStr}</small><br>
         <span class="badge ${statusClass} text-uppercase">${data.status}</span>
         <div class="mt-2 text-muted small">Price: ${data.price} PLN</div>
-
+        ${email ? `<div class="mt-1 text-muted small">E-mail: ${email}</div>` : ''}
         ${
           user.uid === "P6PdwRRWIUXFeXySixV7CIrzCV53"
             ? `<button class="btn btn-sm btn-success mt-2" onclick="acceptRental('${id}')">Accept</button>`
@@ -137,7 +138,7 @@ export async function loadRentals() {
       </div>
     `;
     container.appendChild(div);
-  });
+  }
 }
 
 export async function loadContact() {
@@ -263,3 +264,31 @@ window.acceptRental = async function (id) {
     });
   }
 };
+
+const userEmailCache = {};
+
+async function getUserEmailById(uid) {
+  // jeśli mamy już w cache, nie pobieramy drugi raz
+  if (userEmailCache[uid]) return userEmailCache[uid];
+
+  try {
+    // pobieramy z kolekcji Users, jeśli taką prowadzisz (opcjonalnie)
+    const userDoc = await getDoc(doc(window.db, "Users", uid));
+    if (userDoc.exists()) {
+      const email = userDoc.data().email;
+      userEmailCache[uid] = email;
+      return email;
+    }
+  } catch (err) {
+    console.warn("Błąd pobierania user email z kolekcji Users:", err);
+  }
+
+  // fallback — z obiektu zalogowanego użytkownika (jeśli to jego rekord)
+  if (window.auth.currentUser?.uid === uid) {
+    const email = window.auth.currentUser.email;
+    userEmailCache[uid] = email;
+    return email;
+  }
+
+  return "Nieznany użytkownik";
+}
