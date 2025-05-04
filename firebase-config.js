@@ -89,10 +89,27 @@ window.logout = async () => {
 
 let authInitialized = false;
 
+function updateMenuVisibility(user) {
+  const orderNav = document.getElementById('orderNav');
+
+  const blockedUsers = [
+    "P6PdwRRWIUXFeXySixV7CIrzCV53",
+    "Qg6GAd6R87gvu9c08CoI23FHNv82"
+  ];
+
+  if (user && blockedUsers.includes(user.uid)) {
+    orderNav?.classList.add('d-none');
+  } else {
+    orderNav?.classList.remove('d-none');
+  }
+}
+
 onAuthStateChanged(auth, (user) => {
   const nav = document.getElementById('mainNav');
   const loginPanel = document.getElementById('loginPanel');
   const hash = location.hash.split('?')[0];
+
+  updateMenuVisibility(user);
 
   if (user) {
     nav?.classList.remove('d-none');
@@ -101,9 +118,8 @@ onAuthStateChanged(auth, (user) => {
     if (!authInitialized) {
       authInitialized = true;
 
-      // Ustaw odpowiednią zakładkę, ale nie ładuj widoku ręcznie!
       if (hash === '#start' || hash === '' || hash === '#') {
-        location.hash = '#rentals'; // uruchomi się loadPage automatycznie
+        location.hash = '#rentals';
       }
     }
   } else {
@@ -111,9 +127,9 @@ onAuthStateChanged(auth, (user) => {
     loginPanel?.classList.remove('show');
 
     if (hash !== '#start') {
-      location.hash = '#start'; // hashchange zadba o resztę
+      location.hash = '#start';
     } else {
-      window.loadPage?.(); // ładowanie start jeśli już jesteśmy na #start
+      window.loadPage?.(); // gdy już jesteśmy na #start
     }
 
     authInitialized = false;
