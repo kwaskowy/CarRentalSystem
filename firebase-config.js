@@ -87,6 +87,8 @@ window.logout = async () => {
   location.hash = '#start';
 };
 
+let authInitialized = false;
+
 onAuthStateChanged(auth, (user) => {
   const nav = document.getElementById('mainNav');
   const loginPanel = document.getElementById('loginPanel');
@@ -96,16 +98,24 @@ onAuthStateChanged(auth, (user) => {
     nav?.classList.remove('d-none');
     loginPanel?.classList.remove('show');
 
-    if (hash === '#start' || hash === '' || hash === '#') {
-      location.hash = '#rentals';
-      window.loadPage?.(); // wymuszone ładowanie widoku
-    } else {
-      window.loadPage?.(); // np. vehicles, payments itp.
+    if (!authInitialized) {
+      authInitialized = true;
+
+      // Ustaw odpowiednią zakładkę, ale nie ładuj widoku ręcznie!
+      if (hash === '#start' || hash === '' || hash === '#') {
+        location.hash = '#rentals'; // uruchomi się loadPage automatycznie
+      }
     }
   } else {
     nav?.classList.add('d-none');
     loginPanel?.classList.remove('show');
-    if (hash !== '#start') location.hash = '#start';
-    window.loadPage?.(); // załaduj ekran startowy
+
+    if (hash !== '#start') {
+      location.hash = '#start'; // hashchange zadba o resztę
+    } else {
+      window.loadPage?.(); // ładowanie start jeśli już jesteśmy na #start
+    }
+
+    authInitialized = false;
   }
 });
