@@ -91,6 +91,7 @@ let authInitialized = false;
 
 function updateMenuVisibility(user) {
   const orderNav = document.getElementById('orderNav');
+  const nav = document.getElementById('mainNav');
 
   const blockedUsers = [
     "P6PdwRRWIUXFeXySixV7CIrzCV53",
@@ -99,8 +100,12 @@ function updateMenuVisibility(user) {
 
   if (user && blockedUsers.includes(user.uid)) {
     orderNav?.classList.add('d-none');
+    nav?.classList.remove('bg-light');
+    nav?.classList.add('bg-secondary-subtle');
   } else {
     orderNav?.classList.remove('d-none');
+    nav?.classList.remove('bg-secondary-subtle');
+    nav?.classList.add('bg-light');
   }
 }
 
