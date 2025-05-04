@@ -41,7 +41,7 @@ function showLogin() {
 const popSound = new Audio('/sounds/pop.wav');
 
 function playFeedback() {
-  navigator.vibrate?.([30]);      // krótka wibracja
+  navigator.vibrate?.([100]);      // krótka wibracja
   popSound.currentTime = 0;       // zresetuj dźwięk
   popSound.play().catch(() => {}); // nie rzucaj błędów jeśli zablokowane
 }
