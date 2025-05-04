@@ -67,7 +67,7 @@ export async function loadVehicleDetails() {
         <li class="list-group-item"><strong>Engine:</strong> ${vehicle.engine}</li>
         <li class="list-group-item"><strong>Transmission:</strong> ${vehicle.transmission}</li>
         <li class="list-group-item"><strong>Seats:</strong> ${vehicle.seats}</li>
-        <li class="list-group-item"><strong>Price:</strong> ${vehicle.price} £/day</li>
+        <li class="list-group-item"><strong>Price:</strong> ${vehicle.price} PLN/day</li>
       </ul>
       <div class="d-flex justify-content-center gap-3 mt-3">
         <button class="btn btn-secondary px-4" onclick="location.hash='rentals'">Back</button>
@@ -122,13 +122,25 @@ export async function loadRentals() {
       : null;
 
     const div = document.createElement('div');
-    div.className = 'card mb-3';
+    div.className = `card mb-3 ${data.insurance ? 'border border-primary border-3 position-relative' : ''}`;
     div.innerHTML = `
         <div class="card-body">
+        ${data.insurance ? `
+          <img src="/images/shield.svg"
+               alt="Insurance"
+               style="position: absolute; top: 8px; right: 8px; width: 24px; height: 24px;"
+          >
+        ` : ''}
           <strong>${data.carId}</strong><br>
           <small>${startStr} → ${endStr}</small><br>
           <span class="badge ${statusClass} text-uppercase">${data.status}</span>
-          <div class="mt-2 text-muted small">Price: ${data.price} PLN</div>
+          <div class="mt-2 text-muted small">
+                Price: ${
+                  data.insurance
+                    ? `${data.price - 400} + 400 PLN`
+                    : `${data.price} PLN`
+                }
+          </div>
           ${email ? `<div class="mt-1 text-muted small">E-mail: ${email}</div>` : ''}
           ${
             user.uid === "P6PdwRRWIUXFeXySixV7CIrzCV53"
@@ -210,12 +222,17 @@ window.submitRental = async function (event) {
   const vehicleId = document.getElementById('vehicleSelect').value;
   const start = document.getElementById('startDate').value;
   const end = document.getElementById('endDate').value;
+  const insurance = document.getElementById('insurance')?.checked || false;
 
   const startDate = new Date(start);
   const endDate = new Date(end);
 
   if (endDate <= startDate) {
-    alert("Data zakończenia musi być późniejsza niż data rozpoczęcia.");
+    Swal.fire({
+      icon: 'error',
+      title: 'Błąd',
+      text: 'Data zakończenia musi być późniejsza niż data rozpoczęcia.'
+    });
     return;
   }
 
@@ -224,7 +241,9 @@ window.submitRental = async function (event) {
   const carDoc = await getDoc(doc(window.db, "Vehicles", vehicleId));
   const car = carDoc.data();
   const pricePerDay = car.price;
-  const totalPrice = days * pricePerDay;
+
+  let totalPrice = days * pricePerDay;
+  if (insurance) totalPrice += 400;
 
   const rental = {
     carId: `${car.brand} ${car.model} ${car.year}`,
@@ -232,7 +251,8 @@ window.submitRental = async function (event) {
     startDate: Timestamp.fromDate(startDate),
     endDate: Timestamp.fromDate(endDate),
     status: "to be accepted",
-    price: totalPrice
+    price: totalPrice,
+    insurance: insurance
   };
 
   try {
@@ -245,9 +265,14 @@ window.submitRental = async function (event) {
     location.hash = "#rentals";
   } catch (err) {
     console.error(err);
-    alert("Wystąpił błąd podczas rezerwacji.");
+    Swal.fire({
+      icon: 'error',
+      title: 'Błąd',
+      text: 'Wystąpił błąd podczas rezerwacji.'
+    });
   }
 };
+
 
 window.acceptRental = async function (id) {
   const ref = doc(window.db, "Rentals", id);
