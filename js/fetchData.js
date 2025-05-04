@@ -4,7 +4,9 @@ import {
   getDoc,
   doc,
   query,
-  where
+  where,
+  Timestamp,
+  addDoc,
 } from "https://www.gstatic.com/firebasejs/9.6.10/firebase-firestore.js";
 
 
@@ -179,3 +181,50 @@ export async function loadOrder() {
     select.appendChild(option);
   });
 }
+
+window.submitRental = async function (event) {
+  event.preventDefault();
+
+  const user = window.auth.currentUser;
+  if (!user) {
+    alert("Musisz być zalogowany!");
+    return;
+  }
+
+  const vehicleId = document.getElementById('vehicleSelect').value;
+  const start = document.getElementById('startDate').value;
+  const end = document.getElementById('endDate').value;
+
+  const startDate = new Date(start);
+  const endDate = new Date(end);
+
+  if (endDate <= startDate) {
+    alert("Data zakończenia musi być późniejsza niż data rozpoczęcia.");
+    return;
+  }
+
+  const days = Math.ceil((endDate - startDate) / (1000 * 60 * 60 * 24));
+
+  const carDoc = await getDoc(doc(window.db, "Vehicles", vehicleId));
+  const car = carDoc.data();
+  const pricePerDay = car.price;
+  const totalPrice = days * pricePerDay;
+
+  const rental = {
+    carId: `${car.brand} ${car.model} ${car.year}`,
+    userId: user.uid,
+    startDate: Timestamp.fromDate(startDate),
+    endDate: Timestamp.fromDate(endDate),
+    status: "to be accepted",
+    price: totalPrice
+  };
+
+  try {
+    await addDoc(collection(window.db, "Rentals"), rental);
+    alert("Rezerwacja została wysłana!");
+    location.hash = "#rentals";
+  } catch (err) {
+    console.error(err);
+    alert("Wystąpił błąd podczas rezerwacji.");
+  }
+};
