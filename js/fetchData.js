@@ -7,6 +7,7 @@ import {
   where,
   Timestamp,
   addDoc,
+  updateDoc
 } from "https://www.gstatic.com/firebasejs/9.6.10/firebase-firestore.js";
 
 
@@ -80,39 +81,43 @@ export async function loadRentals() {
   const container = document.getElementById('rentals-list');
   container.innerHTML = '';
 
-  const q = query(
-    collection(window.db, "Rentals"),
-    where("userId", "==", user.uid)
-  );
+  let q;
+
+  // Szef widzi wszystko
+  if (user.uid === "Qg6GAd6R87gvu9c08CoI23FHNv82") {
+    q = collection(window.db, "Rentals");
+  }
+  // Admin widzi tylko do zatwierdzenia
+  else if (user.uid === "P6PdwRRWIUXFeXySixV7CIrzCV53") {
+    q = query(collection(window.db, "Rentals"), where("status", "==", "to be accepted"));
+  }
+  // Normalny użytkownik widzi tylko swoje
+  else {
+    q = query(collection(window.db, "Rentals"), where("userId", "==", user.uid));
+  }
 
   const snapshot = await getDocs(q);
 
-  // opcje doLocale…
   const dateOptions = { year: 'numeric', month: 'long', day: 'numeric' };
-  const timeOptions = { hour: '2-digit', minute: '2-digit' };
 
-  // mapa statusów → klas Bootstrap
   const statusMap = {
-    cancelled:  'bg-danger',   // czerwony      – anulowany
-    pending:    'bg-warning',  // żółty         – w oczekiwaniu
-    confirmed:  'bg-primary',  // niebieski     – potwierdzony
-    completed:  'bg-success'   // zielony       – zakończony
+    cancelled:  'bg-danger',
+    pending:    'bg-warning',
+    confirmed:  'bg-primary',
+    completed:  'bg-success',
+    'to be accepted': 'bg-warning text-dark'
   };
 
-  snapshot.forEach(doc => {
-    const data = doc.data();
+  snapshot.forEach(docItem => {
+    const data = docItem.data();
+    const id = docItem.id;
 
-    // Timestamp → Date
     const startDate = data.startDate.toDate();
-    const endDate   = data.endDate.toDate();
+    const endDate = data.endDate.toDate();
 
-    // formatowanie daty i czasu
     const startStr = startDate.toLocaleDateString('pl-PL', dateOptions)
-                   + ' ' + startDate.toLocaleTimeString('pl-PL', timeOptions);
     const endStr   = endDate.toLocaleDateString('pl-PL', dateOptions)
-                   + ' ' + endDate.toLocaleTimeString('pl-PL', timeOptions);
 
-    // dobieramy klasę badge; jeśli status nieznany → szary
     const statusClass = statusMap[data.status] || 'bg-secondary';
 
     const div = document.createElement('div');
@@ -121,12 +126,14 @@ export async function loadRentals() {
       <div class="card-body">
         <strong>${data.carId}</strong><br>
         <small>${startStr} → ${endStr}</small><br>
-        <span class="badge ${statusClass} text-uppercase">
-          ${data.status}
-        </span>
-        <div class="mt-2 text-muted small">
-          Price: ${data.price} PLN
-        </div>
+        <span class="badge ${statusClass} text-uppercase">${data.status}</span>
+        <div class="mt-2 text-muted small">Price: ${data.price} PLN</div>
+
+        ${
+          user.uid === "P6PdwRRWIUXFeXySixV7CIrzCV53"
+            ? `<button class="btn btn-sm btn-success mt-2" onclick="acceptRental('${id}')">Accept</button>`
+            : ''
+        }
       </div>
     `;
     container.appendChild(div);
@@ -187,7 +194,11 @@ window.submitRental = async function (event) {
 
   const user = window.auth.currentUser;
   if (!user) {
-    alert("Musisz być zalogowany!");
+    Swal.fire({
+      icon: 'warning',
+      title: 'Uwaga',
+      text: 'Musisz być zalogowany!'
+    });
     return;
   }
 
@@ -221,10 +232,34 @@ window.submitRental = async function (event) {
 
   try {
     await addDoc(collection(window.db, "Rentals"), rental);
-    alert("Rezerwacja została wysłana!");
+    Swal.fire({
+      icon: 'success',
+      title: 'Sukces',
+      text: 'Rezerwacja została wysłana!'
+    });
     location.hash = "#rentals";
   } catch (err) {
     console.error(err);
     alert("Wystąpił błąd podczas rezerwacji.");
+  }
+};
+
+window.acceptRental = async function (id) {
+  const ref = doc(window.db, "Rentals", id);
+  try {
+    await updateDoc(ref, { status: "confirmed" });
+    Swal.fire({
+      icon: 'success',
+      title: 'Zatwierdzono',
+      text: 'Wypożyczenie zostało zatwierdzone.'
+    });
+    loadRentals(); // odśwież widok
+  } catch (err) {
+    console.error(err);
+    Swal.fire({
+      icon: 'error',
+      title: 'Błąd',
+      text: 'Wystąpił problem przy zatwierdzaniu.'
+    });
   }
 };
