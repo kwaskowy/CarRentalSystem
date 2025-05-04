@@ -172,29 +172,49 @@ export async function loadContact() {
   const container = document.getElementById('locations-list');
   container.innerHTML = '';
 
-  const snapshot = await getDocs(collection(window.db, "Locations"));
-  
-  snapshot.forEach(doc => {
-    const data = doc.data();
+  // Najpierw spróbuj pobrać lokalizację użytkownika
+  navigator.geolocation.getCurrentPosition(
+    async (position) => {
+      const userLat = position.coords.latitude;
+      const userLng = position.coords.longitude;
 
-    const div = document.createElement('div');
-    div.className = 'col-12 col-md-6';
-    const mapEmbed = data.mapUrl
-      ? `<div class="ratio ratio-4x3 mt-3"><iframe src="${data.mapUrl}" style="border:0;" loading="lazy" allowfullscreen></iframe></div>`
-      : '';
+      const snapshot = await getDocs(collection(window.db, "Locations"));
 
-    div.innerHTML = `
-      <div class="card h-100 shadow-sm p-3">
-        <h6 class="text-primary">${data.city}</h6>
-        <p class="mb-1"><strong>Adres:</strong> ${data.address}</p>
-        <p class="mb-1"><strong>Telefon:</strong> ${data.phone}</p>
-        <p class="mb-1"><strong>Email:</strong> <a href="mailto:${data.email}">${data.email}</a></p>
-        <p class="mb-1"><strong>Godziny otwarcia:</strong> ${data.hours}</p>
-        ${mapEmbed}
-      </div>
-    `;
-    container.appendChild(div);
-  });
+      snapshot.forEach(doc => {
+        const data = doc.data();
+
+        // embed z trasą (Google Maps Embed API)
+        const embedUrl = `https://www.google.com/maps/embed/v1/directions?key=AIzaSyDqsOeYkP-xQrOb40t2qdymdbbjhFft688&origin=${userLat},${userLng}&destination=${data.lat},${data.lng}&mode=driving`;
+
+        const div = document.createElement('div');
+        div.className = 'col-12 col-md-6';
+
+        div.innerHTML = `
+          <div class="card h-100 shadow-sm p-3">
+            <h6 class="text-primary">${data.city}</h6>
+            <p class="mb-1"><strong>Adres:</strong> ${data.address}</p>
+            <p class="mb-1"><strong>Telefon:</strong> ${data.phone}</p>
+            <p class="mb-1"><strong>Email:</strong> <a href="mailto:${data.email}">${data.email}</a></p>
+            <p class="mb-1"><strong>Godziny otwarcia:</strong> ${data.hours}</p>
+
+            <div class="ratio ratio-4x3 mt-3">
+              <iframe
+                src="${embedUrl}"
+                style="border:0;"
+                loading="lazy"
+                allowfullscreen>
+              </iframe>
+            </div>
+          </div>
+        `;
+        container.appendChild(div);
+      });
+    },
+    (err) => {
+      container.innerHTML = `<p class="text-danger">Nie udało się pobrać Twojej lokalizacji: ${err.message}</p>`;
+    },
+    { enableHighAccuracy: true }
+  );
 }
 export async function loadOrder() {
   const select = document.getElementById('vehicleSelect');
