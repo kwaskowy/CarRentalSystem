@@ -124,18 +124,22 @@ export async function loadRentals() {
     const div = document.createElement('div');
     div.className = 'card mb-3';
     div.innerHTML = `
-      <div class="card-body">
-        <strong>${data.carId}</strong><br>
-        <small>${startStr} → ${endStr}</small><br>
-        <span class="badge ${statusClass} text-uppercase">${data.status}</span>
-        <div class="mt-2 text-muted small">Price: ${data.price} PLN</div>
-        ${email ? `<div class="mt-1 text-muted small">E-mail: ${email}</div>` : ''}
-        ${
-          user.uid === "P6PdwRRWIUXFeXySixV7CIrzCV53"
-            ? `<button class="btn btn-sm btn-success mt-2" onclick="acceptRental('${id}')">Accept</button>`
-            : ''
-        }
-      </div>
+        <div class="card-body">
+          <strong>${data.carId}</strong><br>
+          <small>${startStr} → ${endStr}</small><br>
+          <span class="badge ${statusClass} text-uppercase">${data.status}</span>
+          <div class="mt-2 text-muted small">Price: ${data.price} PLN</div>
+          ${email ? `<div class="mt-1 text-muted small">E-mail: ${email}</div>` : ''}
+          ${
+            user.uid === "P6PdwRRWIUXFeXySixV7CIrzCV53"
+              ? `<div class="d-flex justify-content-end">
+                  <button class="btn btn-outline-primary btn-sm mt-2" onclick="acceptRental('${id}')">
+                    Accept
+                  </button>
+                </div>`
+              : ''
+          }
+        </div>
     `;
     container.appendChild(div);
   }
