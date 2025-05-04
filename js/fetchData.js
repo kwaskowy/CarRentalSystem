@@ -127,3 +127,31 @@ export async function loadRentals() {
   });
 }
 
+export async function loadContact() {
+  const container = document.getElementById('locations-list');
+  container.innerHTML = '';
+
+  const snapshot = await getDocs(collection(window.db, "Locations"));
+  
+  snapshot.forEach(doc => {
+    const data = doc.data();
+
+    const div = document.createElement('div');
+    div.className = 'col-12 col-md-6';
+    const mapEmbed = data.mapUrl
+      ? `<div class="ratio ratio-4x3 mt-3"><iframe src="${data.mapUrl}" style="border:0;" loading="lazy" allowfullscreen></iframe></div>`
+      : '';
+
+    div.innerHTML = `
+      <div class="card h-100 shadow-sm p-3">
+        <h6 class="text-primary">${data.city}</h6>
+        <p class="mb-1"><strong>Adres:</strong> ${data.address}</p>
+        <p class="mb-1"><strong>Telefon:</strong> ${data.phone}</p>
+        <p class="mb-1"><strong>Email:</strong> <a href="mailto:${data.email}">${data.email}</a></p>
+        <p class="mb-1"><strong>Godziny otwarcia:</strong> ${data.hours}</p>
+        ${mapEmbed}
+      </div>
+    `;
+    container.appendChild(div);
+  });
+}

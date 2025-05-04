@@ -22,6 +22,7 @@ function loadPage() {
       if (view === 'vehicles') module.loadVehicles();
       if (view === 'vehicle-details') module.loadVehicleDetails();
       if (view === 'rentals') module.loadRentals();
+      if (view === 'contact') module.loadContact();
     });
 }
 function showLogin() {
